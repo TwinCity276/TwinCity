@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "TwinCity"
+description = "A civic incident reporting and decision-support platform for Freetown, connecting residents with City Council, EDSA, and FireForce teams."
+version = "1.0.0"
+id = "artifacts/twincity"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22716
+
+[services.development]
+run = "pnpm --filter @workspace/twincity run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/twincity", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/twincity/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22716"
+BASE_PATH = "/"

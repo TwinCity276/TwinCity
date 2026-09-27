@@ -1,0 +1,1 @@
+- [Generated API client headers](api-client-headers.md) — include `dom.iterable` when generated hooks iterate response Headers.
