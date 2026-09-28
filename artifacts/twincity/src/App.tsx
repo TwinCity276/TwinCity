@@ -71,13 +71,13 @@ const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
 
 type StatIcon = typeof Activity;
 
-function FlagLogo({ compact = false }: { compact?: boolean }) {
+function FlagLogo({ compact = false, siteName = 'TwinCity' }: { compact?: boolean; siteName?: string }) {
   return (
     <Link href="/" className="group flex items-center gap-3" data-testid="link-logo">
       <img src={`${basePath}/logo.svg`} alt="Sierra Leone flag" className="h-7 w-10 shrink-0 rounded-[3px] object-cover shadow-[0_3px_0_hsl(177_58%_15%/0.16)] transition-transform group-hover:-translate-y-0.5" data-testid="img-sierra-leone-flag" />
       {!compact && (
         <span className="font-display text-lg font-bold tracking-[-0.04em] text-inherit">
-          Twin<span className="text-secondary">City</span>
+          {siteName}
         </span>
       )}
     </Link>
@@ -134,11 +134,11 @@ function useClock() {
   return now;
 }
 
-function PublicNav() {
+function PublicNav({ siteName }: { siteName: string }) {
   return (
     <header className="absolute inset-x-0 top-0 z-20">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 lg:px-8">
-        <FlagLogo />
+        <FlagLogo siteName={siteName} />
         <nav className="hidden items-center gap-8 text-sm font-semibold text-primary/75 md:flex" aria-label="Public navigation">
           <a href="#how-it-works" className="transition-colors hover:text-primary" data-testid="link-how-it-works">How it works</a>
           <a href="#departments" className="transition-colors hover:text-primary" data-testid="link-departments">Departments</a>
@@ -146,7 +146,7 @@ function PublicNav() {
         </nav>
         <div className="flex items-center gap-2">
           <Link href="/sign-in" className="rounded-lg px-3 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary/5" data-testid="link-sign-in">Sign in</Link>
-          <Link href="/sign-up" className="rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-[0_4px_0_hsl(177_51%_13%/0.15)] transition-transform hover:-translate-y-0.5" data-testid="link-sign-up">Join TwinCity</Link>
+           <Link href="/sign-up" className="rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-[0_4px_0_hsl(177_51%_13%/0.15)] transition-transform hover:-translate-y-0.5" data-testid="link-sign-up">Join {siteName}</Link>
         </div>
       </div>
     </header>
@@ -160,12 +160,13 @@ function HomePage() {
   const settings = useGetAdminSettings();
   const now = useClock();
   const live = health.data?.status === 'ok' || health.data?.status === 'healthy';
+  const siteName = settings.data?.siteName ?? 'TwinCity';
   const welcomeMessage = settings.data?.welcomeMessage ?? 'TwinCity gives Freetown residents a direct line to the teams keeping the city moving — from a dark street in Kissy to a blocked drain in Lumley.';
   const tagline = settings.data?.tagline ?? 'Your report. Our response.';
   if (isLoaded && isSignedIn) return <Redirect to="/incidents" />;
   return (
     <div className="twincity-noise min-h-[100dvh] overflow-hidden bg-background text-foreground">
-      <PublicNav />
+      <PublicNav siteName={siteName} />
       <main>
         <section className="surface-grid relative overflow-hidden border-b border-border/60 bg-[hsl(45_37%_95%)]">
           <div className="pointer-events-none absolute -right-24 top-24 h-96 w-96 rounded-full border-[50px] border-accent/15" />
@@ -235,7 +236,7 @@ function HomePage() {
           <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[.17em] text-accent">The desks behind the response</p><h2 className="mt-3 font-display text-4xl font-bold tracking-[-.05em]">One city. Many hands.</h2></div><p className="max-w-xs text-sm leading-6 text-muted-foreground">Your report lands with the team closest to the problem.</p></div>
           {departments.isLoading ? <div className="mt-10"><LoadingBlock label="Loading service departments" /></div> : departments.isError ? <div className="mt-10"><ErrorState retry={() => departments.refetch()} /></div> : <div className="mt-10 grid gap-4 md:grid-cols-3">{(departments.data ?? []).map((department, index) => <DepartmentCard department={department} index={index} key={department.id} />)}</div>}
         </section>
-        <footer className="border-t border-border bg-[hsl(42_32%_90%/.6)]"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-5 px-5 py-8 lg:px-8"><FlagLogo /><p className="text-xs text-muted-foreground">A public service for Freetown, Sierra Leone · {new Date().getFullYear()}</p><p className="text-xs font-bold uppercase tracking-[.15em] text-primary/60">For the city, with the city</p></div></footer>
+         <footer className="border-t border-border bg-[hsl(42_32%_90%/.6)]"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-5 px-5 py-8 lg:px-8"><FlagLogo siteName={siteName} /><p className="text-xs text-muted-foreground">A public service for Freetown, Sierra Leone · {new Date().getFullYear()}</p><p className="text-xs font-bold uppercase tracking-[.15em] text-primary/60">For the city, with the city</p></div></footer>
       </main>
     </div>
   );
@@ -252,6 +253,7 @@ function AppShell({ children }: { children: ReactNode }) {
   const { user } = useUser();
   const { signOut } = useClerk();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const settings = useGetAdminSettings();
   const email = user?.primaryEmailAddress?.emailAddress ?? 'Resident';
   const nav = [{ href: '/', label: 'Home', icon: Home }, { href: '/incidents', label: 'My reports', icon: Activity }, { href: '/report', label: 'Report an issue', icon: Plus }];
   const dashboards = [{ href: '/dashboard/city-council', label: 'City Council', icon: Home }, { href: '/dashboard/edsa', label: 'EDSA', icon: Zap }, { href: '/dashboard/fireforce', label: 'FireForce', icon: Flame }];
@@ -259,7 +261,7 @@ function AppShell({ children }: { children: ReactNode }) {
     <div className="twincity-noise min-h-[100dvh] bg-background text-foreground">
       <aside className={`fixed inset-y-0 left-0 z-40 flex w-[270px] flex-col overflow-y-auto bg-primary px-5 py-6 text-primary-foreground transition-transform lg:translate-x-0 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex items-center justify-between">
-          <FlagLogo />
+           <FlagLogo siteName={settings.data?.siteName ?? 'TwinCity'} />
           <button className="rounded-lg p-2 text-primary-foreground/60 hover:bg-primary-foreground/10 lg:hidden" onClick={() => setMobileOpen(false)} data-testid="button-close-menu"><X className="h-5 w-5" /></button>
         </div>
         <div className="mt-10 rounded-2xl border border-primary-foreground/10 bg-primary-foreground/5 p-4">
@@ -393,9 +395,10 @@ function AdminPage() {
   const { user } = useUser();
   const queryClient = useQueryClient();
   const email = user?.primaryEmailAddress?.emailAddress?.toLowerCase() ?? '';
-  const authorized = email === 'madomdoma780@gmail.com';
+  const primaryAdmin = email === 'madomdoma780@gmail.com';
+  const admins = useListAdmins({ query: { retry: false, queryKey: getListAdminsQueryKey() } });
+  const authorized = primaryAdmin || Boolean(admins.data);
   const settings = useGetAdminSettings({ query: { enabled: authorized, queryKey: getGetAdminSettingsQueryKey() } });
-  const admins = useListAdmins({ query: { enabled: authorized, queryKey: getListAdminsQueryKey() } });
   const updateSettings = useUpdateAdminSettings();
   const createAdmin = useCreateAdmin();
   const deleteAdmin = useDeleteAdmin();
@@ -408,11 +411,49 @@ function AdminPage() {
   const [newRole, setNewRole] = useState('operator');
   const [newDepartment, setNewDepartment] = useState('');
   useEffect(() => { if (settings.data) { setSiteName(settings.data.siteName); setTagline(settings.data.tagline); setWelcomeMessage(settings.data.welcomeMessage); } }, [settings.data]);
-  if (!authorized) return <div className="mx-auto max-w-xl py-16 text-center"><div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-accent/10 text-accent"><ShieldCheck className="h-8 w-8" /></div><h1 className="mt-6 font-display text-3xl font-bold">Admin access is restricted</h1><p className="mt-3 text-sm leading-6 text-muted-foreground">This signed-in account is not on the TwinCity admin list. If you need dashboard access, ask the city administrator to add your email.</p><Link href="/incidents" className="mt-6 inline-flex rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground" data-testid="link-return-portal">Return to portal</Link></div>;
-  const saveSettings = () => updateSettings.mutate({ data: { siteName, tagline, welcomeMessage } }, { onSuccess: () => { queryClient.invalidateQueries({ queryKey: getGetAdminSettingsQueryKey() }); toast({ title: 'Site settings saved', description: 'Your changes are live across TwinCity.' }); } });
-  const addAdmin = () => { if (!newEmail.trim()) return; createAdmin.mutate({ data: { email: newEmail.trim(), role: newRole, department: newDepartment || null } }, { onSuccess: () => { setNewEmail(''); setNewDepartment(''); queryClient.invalidateQueries({ queryKey: getListAdminsQueryKey() }); toast({ title: 'Access added', description: `${newEmail} can now access the selected desk.` }); } }); };
-  const removeAdmin = (id: number) => { if (!window.confirm('Remove this dashboard access?')) return; deleteAdmin.mutate({ id }, { onSuccess: () => { queryClient.invalidateQueries({ queryKey: getListAdminsQueryKey() }); toast({ title: 'Access removed' }); } }); };
-  return <div className="animate-rise"><div><p className="text-xs font-bold uppercase tracking-[.17em] text-accent">Protected controls</p><h1 className="mt-2 font-display text-4xl font-bold tracking-[-.06em]">Admin settings</h1><p className="mt-2 text-sm text-muted-foreground">Keep TwinCity's public voice and operations access current.</p></div>{settings.isLoading || admins.isLoading ? <div className="mt-8"><LoadingBlock label="Loading admin controls" /></div> : settings.isError || admins.isError ? <div className="mt-8"><ErrorState retry={() => { settings.refetch(); admins.refetch(); }} /></div> : <div className="mt-8 grid gap-6 xl:grid-cols-[1.15fr_.85fr]"><section className="rounded-2xl border border-border bg-card p-6"><div className="flex items-start justify-between gap-4 border-b border-border pb-5"><div><h2 className="font-display text-xl font-bold">Site voice</h2><p className="mt-1 text-xs text-muted-foreground">These words appear on the public welcome surface.</p></div><Pencil className="h-5 w-5 text-secondary-foreground" /></div><div className="mt-6 space-y-5"><label className="block"><span className="mb-2 block text-xs font-bold uppercase tracking-[.12em] text-muted-foreground">Site name</span><Input value={siteName} onChange={(event) => setSiteName(event.target.value)} className="bg-background" data-testid="input-admin-site-name" /></label><label className="block"><span className="mb-2 block text-xs font-bold uppercase tracking-[.12em] text-muted-foreground">Tagline</span><Input value={tagline} onChange={(event) => setTagline(event.target.value)} className="bg-background" data-testid="input-admin-tagline" /></label><label className="block"><span className="mb-2 block text-xs font-bold uppercase tracking-[.12em] text-muted-foreground">Welcome message</span><Textarea value={welcomeMessage} onChange={(event) => setWelcomeMessage(event.target.value)} className="min-h-28 bg-background" data-testid="textarea-admin-welcome" /></label><Button onClick={saveSettings} disabled={updateSettings.isPending} data-testid="button-save-settings">{updateSettings.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />} Save site voice</Button></div></section><section className="rounded-2xl border border-border bg-card p-6"><div className="border-b border-border pb-5"><h2 className="font-display text-xl font-bold">Dashboard access</h2><p className="mt-1 text-xs text-muted-foreground">Invite the people who keep each desk moving.</p></div><div className="mt-5 space-y-3"><Input type="email" placeholder="colleague@email.com" value={newEmail} onChange={(event) => setNewEmail(event.target.value)} className="bg-background" data-testid="input-new-admin-email" /><div className="grid grid-cols-2 gap-3"><select value={newRole} onChange={(event) => setNewRole(event.target.value)} className="h-10 rounded-md border border-input bg-background px-3 text-sm" data-testid="select-new-admin-role"><option value="operator">Operator</option><option value="supervisor">Supervisor</option><option value="admin">Admin</option></select><select value={newDepartment} onChange={(event) => setNewDepartment(event.target.value)} className="h-10 rounded-md border border-input bg-background px-3 text-sm" data-testid="select-new-admin-department"><option value="">All desks</option>{(departments.data ?? []).map((department) => <option value={department.shortName} key={department.id}>{department.shortName}</option>)}</select></div><Button variant="secondary" className="w-full" onClick={addAdmin} disabled={createAdmin.isPending || !newEmail.trim()} data-testid="button-add-admin"><Plus className="mr-2 h-4 w-4" /> Add dashboard access</Button></div><div className="mt-7 space-y-2">{(admins.data ?? []).length === 0 ? <p className="rounded-xl bg-muted p-4 text-center text-xs text-muted-foreground" data-testid="state-empty-admins">No additional dashboard access yet.</p> : (admins.data ?? []).map((admin) => <div className="flex items-center justify-between gap-3 rounded-xl border border-border p-3" key={admin.id} data-testid={`row-admin-${admin.id}`}><div className="min-w-0"><p className="truncate text-sm font-bold">{admin.email}</p><p className="mt-0.5 text-xs text-muted-foreground">{admin.role}{admin.department ? ` · ${admin.department}` : ''}</p></div><button onClick={() => removeAdmin(admin.id)} className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive" data-testid={`button-remove-admin-${admin.id}`}><Trash2 className="h-4 w-4" /></button></div>)}</div></section></div>}</div>;
+  if (!admins.isLoading && !primaryAdmin && admins.isError) return <div className="mx-auto max-w-xl py-16 text-center"><div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-accent/10 text-accent"><ShieldCheck className="h-8 w-8" /></div><h1 className="mt-6 font-display text-3xl font-bold">Admin access is restricted</h1><p className="mt-3 text-sm leading-6 text-muted-foreground">This signed-in account is not on the TwinCity admin list. If you need dashboard access, ask the city administrator to add your email.</p><Link href="/incidents" className="mt-6 inline-flex rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground" data-testid="link-return-portal">Return to portal</Link></div>;
+  const saveSettings = () => {
+    const nextSettings = { siteName: siteName.trim(), tagline: tagline.trim(), welcomeMessage: welcomeMessage.trim() };
+    if (!nextSettings.siteName || !nextSettings.tagline || !nextSettings.welcomeMessage) {
+      toast({ title: 'Complete all site voice fields', description: 'Site name, tagline, and welcome message cannot be empty.', variant: 'destructive' });
+      return;
+    }
+    updateSettings.mutate({ data: nextSettings }, {
+      onSuccess: (saved) => {
+        setSiteName(saved.siteName);
+        setTagline(saved.tagline);
+        setWelcomeMessage(saved.welcomeMessage);
+        queryClient.setQueryData(getGetAdminSettingsQueryKey(), saved);
+        queryClient.invalidateQueries({ queryKey: getGetAdminSettingsQueryKey() });
+        toast({ title: 'Site settings saved', description: 'Your changes are live across TwinCity.' });
+      },
+      onError: () => toast({ title: 'Settings were not saved', description: 'You may not have permission, or the city desk is temporarily unavailable.', variant: 'destructive' }),
+    });
+  };
+  const addAdmin = () => {
+    const normalizedEmail = newEmail.trim().toLowerCase();
+    if (!normalizedEmail) return;
+    createAdmin.mutate({ data: { email: normalizedEmail, role: newRole, department: newDepartment || null } }, {
+      onSuccess: () => {
+        setNewEmail('');
+        setNewDepartment('');
+        queryClient.invalidateQueries({ queryKey: getListAdminsQueryKey() });
+        toast({ title: 'Access added', description: `${normalizedEmail} can now access the selected desk.` });
+      },
+      onError: () => toast({ title: 'Access was not added', description: 'Check the email address or confirm this account has admin permission.', variant: 'destructive' }),
+    });
+  };
+  const removeAdmin = (id: number) => {
+    if (!window.confirm('Remove this dashboard access?')) return;
+    deleteAdmin.mutate({ id }, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getListAdminsQueryKey() });
+        toast({ title: 'Access removed' });
+      },
+      onError: () => toast({ title: 'Access was not removed', description: 'The admin list could not be updated.', variant: 'destructive' }),
+    });
+  };
+  return <div className="animate-rise"><div><p className="text-xs font-bold uppercase tracking-[.17em] text-accent">Protected controls</p><h1 className="mt-2 font-display text-4xl font-bold tracking-[-.06em]">Admin settings</h1><p className="mt-2 text-sm text-muted-foreground">Keep TwinCity's public voice and operations access current.</p></div>{settings.isLoading || admins.isLoading ? <div className="mt-8"><LoadingBlock label="Loading admin controls" /></div> : settings.isError ? <div className="mt-8"><ErrorState retry={() => settings.refetch()} /></div> : <div className="mt-8 grid gap-6 xl:grid-cols-[1.15fr_.85fr]"><section className="rounded-2xl border border-border bg-card p-6"><div className="flex items-start justify-between gap-4 border-b border-border pb-5"><div><h2 className="font-display text-xl font-bold">Site voice</h2><p className="mt-1 text-xs text-muted-foreground">These words appear on the public welcome surface.</p></div><Pencil className="h-5 w-5 text-secondary-foreground" /></div><div className="mt-6 space-y-5"><label className="block"><span className="mb-2 block text-xs font-bold uppercase tracking-[.12em] text-muted-foreground">Site name</span><Input value={siteName} onChange={(event) => setSiteName(event.target.value)} className="bg-background" data-testid="input-admin-site-name" /></label><label className="block"><span className="mb-2 block text-xs font-bold uppercase tracking-[.12em] text-muted-foreground">Tagline</span><Input value={tagline} onChange={(event) => setTagline(event.target.value)} className="bg-background" data-testid="input-admin-tagline" /></label><label className="block"><span className="mb-2 block text-xs font-bold uppercase tracking-[.12em] text-muted-foreground">Welcome message</span><Textarea value={welcomeMessage} onChange={(event) => setWelcomeMessage(event.target.value)} className="min-h-28 bg-background" data-testid="textarea-admin-welcome" /></label><Button onClick={saveSettings} disabled={updateSettings.isPending} data-testid="button-save-settings">{updateSettings.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />} Save site voice</Button></div></section><section className="rounded-2xl border border-border bg-card p-6"><div className="border-b border-border pb-5"><h2 className="font-display text-xl font-bold">Dashboard access</h2><p className="mt-1 text-xs text-muted-foreground">Invite the people who keep each desk moving.</p></div><div className="mt-5 space-y-3"><Input type="email" placeholder="colleague@email.com" value={newEmail} onChange={(event) => setNewEmail(event.target.value)} className="bg-background" data-testid="input-new-admin-email" /><div className="grid grid-cols-2 gap-3"><select value={newRole} onChange={(event) => setNewRole(event.target.value)} className="h-10 rounded-md border border-input bg-background px-3 text-sm" data-testid="select-new-admin-role"><option value="operator">Operator</option><option value="supervisor">Supervisor</option><option value="admin">Admin</option></select><select value={newDepartment} onChange={(event) => setNewDepartment(event.target.value)} className="h-10 rounded-md border border-input bg-background px-3 text-sm" data-testid="select-new-admin-department"><option value="">All desks</option>{(departments.data ?? []).map((department) => <option value={department.shortName} key={department.id}>{department.shortName}</option>)}</select></div><Button variant="secondary" className="w-full" onClick={addAdmin} disabled={createAdmin.isPending || !newEmail.trim()} data-testid="button-add-admin"><Plus className="mr-2 h-4 w-4" /> Add dashboard access</Button></div><div className="mt-7 space-y-2">{(admins.data ?? []).length === 0 ? <p className="rounded-xl bg-muted p-4 text-center text-xs text-muted-foreground" data-testid="state-empty-admins">No additional dashboard access yet.</p> : (admins.data ?? []).map((admin) => <div className="flex items-center justify-between gap-3 rounded-xl border border-border p-3" key={admin.id} data-testid={`row-admin-${admin.id}`}><div className="min-w-0"><p className="truncate text-sm font-bold">{admin.email}</p><p className="mt-0.5 text-xs text-muted-foreground">{admin.role}{admin.department ? ` · ${admin.department}` : ''}</p></div><button onClick={() => removeAdmin(admin.id)} className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive" data-testid={`button-remove-admin-${admin.id}`}><Trash2 className="h-4 w-4" /></button></div>)}</div></section></div>}</div>;
 }
 
 function AuthPage({ mode }: { mode: 'sign-in' | 'sign-up' }) {
