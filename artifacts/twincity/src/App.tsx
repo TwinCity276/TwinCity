@@ -257,7 +257,7 @@ function AppShell({ children }: { children: ReactNode }) {
   const dashboards = [{ href: '/dashboard/city-council', label: 'City Council', icon: Home }, { href: '/dashboard/edsa', label: 'EDSA', icon: Zap }, { href: '/dashboard/fireforce', label: 'FireForce', icon: Flame }];
   return (
     <div className="twincity-noise min-h-[100dvh] bg-background text-foreground">
-      <aside className={`fixed inset-y-0 left-0 z-40 flex w-[270px] flex-col bg-primary px-5 py-6 text-primary-foreground transition-transform lg:translate-x-0 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed inset-y-0 left-0 z-40 flex w-[270px] flex-col overflow-y-auto bg-primary px-5 py-6 text-primary-foreground transition-transform lg:translate-x-0 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex items-center justify-between">
           <FlagLogo />
           <button className="rounded-lg p-2 text-primary-foreground/60 hover:bg-primary-foreground/10 lg:hidden" onClick={() => setMobileOpen(false)} data-testid="button-close-menu"><X className="h-5 w-5" /></button>
@@ -276,7 +276,7 @@ function AppShell({ children }: { children: ReactNode }) {
             {dashboards.map(({ href, label, icon: Icon }) => <Link key={href} href={href} onClick={() => setMobileOpen(false)} className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${location === href ? 'bg-primary-foreground/10 text-secondary' : 'text-primary-foreground/55 hover:bg-primary-foreground/10 hover:text-primary-foreground'}`} data-testid={`link-nav-${label.toLowerCase()}`}><Icon className="h-4 w-4" /> {label}</Link>)}
           </nav>
         </div>
-        <div className="mt-auto space-y-1 border-t border-primary-foreground/10 pt-4">
+        <div className="mt-6 space-y-1 border-t border-primary-foreground/10 pt-4 pb-2">
           <Link href="/admin" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-primary-foreground/55 hover:bg-primary-foreground/10 hover:text-primary-foreground" data-testid="link-nav-admin"><Settings2 className="h-4 w-4" /> Admin settings</Link>
           <button onClick={() => signOut({ redirectUrl: basePath || '/' })} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-primary-foreground/55 hover:bg-primary-foreground/10 hover:text-primary-foreground" data-testid="button-logout"><LogOut className="h-4 w-4" /> Log out</button>
         </div>
