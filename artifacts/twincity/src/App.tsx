@@ -74,9 +74,7 @@ type StatIcon = typeof Activity;
 function FlagLogo({ compact = false }: { compact?: boolean }) {
   return (
     <Link href="/" className="group flex items-center gap-3" data-testid="link-logo">
-      <span className="flag-mark flex h-10 w-10 shrink-0 items-center justify-center rounded-[11px] bg-secondary shadow-[0_5px_0_hsl(177_51%_13%/0.14)]">
-        <img src={`${basePath}/logo.svg`} alt="Sierra Leone flag" className="h-8 w-8 rounded-[7px]" data-testid="img-sierra-leone-flag" />
-      </span>
+      <img src={`${basePath}/logo.svg`} alt="Sierra Leone flag" className="h-7 w-10 shrink-0 rounded-[3px] object-cover shadow-[0_3px_0_hsl(177_58%_15%/0.16)] transition-transform group-hover:-translate-y-0.5" data-testid="img-sierra-leone-flag" />
       {!compact && (
         <span className="font-display text-lg font-bold tracking-[-0.04em] text-inherit">
           Twin<span className="text-secondary">City</span>
@@ -157,7 +155,6 @@ function PublicNav() {
 
 function HomePage() {
   const { isSignedIn, isLoaded } = useAuth();
-  if (isLoaded && isSignedIn) return <Redirect to="/incidents" />;
   const health = useHealthCheck();
   const departments = useListDepartments();
   const settings = useGetAdminSettings();
@@ -165,13 +162,14 @@ function HomePage() {
   const live = health.data?.status === 'ok' || health.data?.status === 'healthy';
   const welcomeMessage = settings.data?.welcomeMessage ?? 'TwinCity gives Freetown residents a direct line to the teams keeping the city moving — from a dark street in Kissy to a blocked drain in Lumley.';
   const tagline = settings.data?.tagline ?? 'Your report. Our response.';
+  if (isLoaded && isSignedIn) return <Redirect to="/incidents" />;
   return (
     <div className="twincity-noise min-h-[100dvh] overflow-hidden bg-background text-foreground">
       <PublicNav />
       <main>
-        <section className="surface-grid relative overflow-hidden border-b border-border/60 bg-[hsl(43_89%_54%/.22)]">
-          <div className="pointer-events-none absolute -right-24 top-24 h-96 w-96 rounded-full border-[50px] border-secondary/30" />
-          <div className="pointer-events-none absolute -bottom-44 left-[-8rem] h-[28rem] w-[28rem] rounded-full border-[72px] border-accent/10" />
+        <section className="surface-grid relative overflow-hidden border-b border-border/60 bg-[hsl(45_37%_95%)]">
+          <div className="pointer-events-none absolute -right-24 top-24 h-96 w-96 rounded-full border-[50px] border-accent/15" />
+          <div className="pointer-events-none absolute -bottom-44 left-[-8rem] h-[28rem] w-[28rem] rounded-full border-[72px] border-secondary/70" />
           <div className="relative mx-auto grid max-w-7xl gap-12 px-5 pb-20 pt-36 lg:grid-cols-[1.08fr_.92fr] lg:items-end lg:px-8 lg:pb-28 lg:pt-48">
             <div className="animate-rise">
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-background/65 px-3 py-1.5 text-xs font-bold uppercase tracking-[.15em] text-primary">
@@ -190,23 +188,23 @@ function HomePage() {
               </div>
             </div>
             <div className="animate-rise animate-rise-2 relative">
-              <div className="relative overflow-hidden rounded-[2rem] border border-primary/15 bg-primary p-6 text-primary-foreground shadow-[14px_16px_0_hsl(14_77%_57%/.18)] lg:p-8">
-                <div className="absolute right-0 top-0 h-40 w-40 rounded-bl-full bg-secondary/15" />
+              <div className="relative overflow-hidden rounded-[2rem] border border-primary/10 bg-[#dcebe7] p-6 text-primary shadow-[14px_16px_0_hsl(204_100%_39%/.14)] lg:p-8">
+                <div className="absolute right-0 top-0 h-40 w-40 rounded-bl-full bg-accent/10" />
                 <div className="relative flex items-start justify-between">
-                  <div><p className="text-xs font-bold uppercase tracking-[.17em] text-secondary">Freetown desk</p><p className="mt-2 font-display text-2xl font-bold">City pulse</p></div>
-                  <Activity className="h-6 w-6 text-secondary" />
+                  <div><p className="text-xs font-bold uppercase tracking-[.17em] text-accent">Freetown desk</p><p className="mt-2 font-display text-2xl font-bold">City pulse</p></div>
+                  <Activity className="h-6 w-6 text-accent" />
                 </div>
                 <div className="relative mt-10 grid grid-cols-2 gap-3">
-                  {[['47', 'reports this week'], ['3.8h', 'average response']].map(([value, label], index) => <div key={label} className="rounded-2xl border border-primary-foreground/10 bg-primary-foreground/5 p-4"><p className="font-display text-3xl font-bold text-secondary">{value}</p><p className="mt-1 text-xs text-primary-foreground/60">{label}</p><div className={`mt-4 h-1 rounded-full ${index === 0 ? 'w-3/4 bg-accent' : 'w-1/2 bg-secondary'}`} /></div>)}
+                  {[['47', 'reports this week'], ['3.8h', 'average response']].map(([value, label], index) => <div key={label} className="rounded-2xl border border-primary/10 bg-primary/5 p-4"><p className="font-display text-3xl font-bold text-accent">{value}</p><p className="mt-1 text-xs text-primary/60">{label}</p><div className={`mt-4 h-1 rounded-full ${index === 0 ? 'w-3/4 bg-accent' : 'w-1/2 bg-primary/20'}`} /></div>)}
                 </div>
                 <div className="relative mt-3 flex items-center justify-between rounded-2xl border border-primary-foreground/10 bg-primary-foreground/5 px-4 py-3 text-xs">
-                  <span className="flex items-center gap-2 text-primary-foreground/70"><span className="h-2 w-2 rounded-full bg-emerald-400" /> Services online</span>
-                  <span className="font-bold text-secondary">{now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })} SLST</span>
+                  <span className="flex items-center gap-2 text-primary/70"><span className="h-2 w-2 rounded-full bg-emerald-500" /> Services online</span>
+                  <span className="font-bold text-accent">{now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })} SLST</span>
                 </div>
                 <div className="relative mt-8 flex items-end gap-1.5">
-                  {[38, 50, 42, 68, 57, 78, 63, 84, 73, 91, 77, 95].map((height, i) => <span key={i} className={`flex-1 rounded-t ${i > 8 ? 'bg-secondary' : 'bg-primary-foreground/20'}`} style={{ height: `${height / 2.5}px` }} />)}
+                  {[38, 50, 42, 68, 57, 78, 63, 84, 73, 91, 77, 95].map((height, i) => <span key={i} className={`flex-1 rounded-t ${i > 8 ? 'bg-accent' : 'bg-primary/15'}`} style={{ height: `${height / 2.5}px` }} />)}
                 </div>
-                <p className="mt-2 text-[10px] uppercase tracking-[.16em] text-primary-foreground/45">Community reports, last 12 days</p>
+                <p className="mt-2 text-[10px] uppercase tracking-[.16em] text-primary/45">Community reports, last 12 days</p>
               </div>
             </div>
           </div>
@@ -255,7 +253,7 @@ function AppShell({ children }: { children: ReactNode }) {
   const { signOut } = useClerk();
   const [mobileOpen, setMobileOpen] = useState(false);
   const email = user?.primaryEmailAddress?.emailAddress ?? 'Resident';
-  const nav = [{ href: '/incidents', label: 'My reports', icon: Activity }, { href: '/report', label: 'Report an issue', icon: Plus }];
+  const nav = [{ href: '/', label: 'Home', icon: Home }, { href: '/incidents', label: 'My reports', icon: Activity }, { href: '/report', label: 'Report an issue', icon: Plus }];
   const dashboards = [{ href: '/dashboard/city-council', label: 'City Council', icon: Home }, { href: '/dashboard/edsa', label: 'EDSA', icon: Zap }, { href: '/dashboard/fireforce', label: 'FireForce', icon: Flame }];
   return <div className="twincity-noise min-h-[100dvh] bg-background text-foreground"><aside className={`fixed inset-y-0 left-0 z-40 flex w-[270px] flex-col bg-primary px-5 py-6 text-primary-foreground transition-transform lg:translate-x-0 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}><div className="flex items-center justify-between"><FlagLogo /><button className="rounded-lg p-2 text-primary-foreground/60 hover:bg-primary-foreground/10 lg:hidden" onClick={() => setMobileOpen(false)} data-testid="button-close-menu"><X className="h-5 w-5" /></button></div><div className="mt-10 rounded-2xl border border-primary-foreground/10 bg-primary-foreground/5 p-4"><p className="text-[10px] font-bold uppercase tracking-[.16em] text-secondary">Resident portal</p><p className="mt-2 truncate text-sm font-semibold">{email}</p><p className="mt-1 text-xs text-primary-foreground/45">Freetown, Sierra Leone</p></div><nav className="mt-8 space-y-1" aria-label="Resident navigation">{nav.map(({ href, label, icon: Icon }) => <Link key={href} href={href} onClick={() => setMobileOpen(false)} className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition-colors ${location === href ? 'bg-secondary text-primary' : 'text-primary-foreground/65 hover:bg-primary-foreground/10 hover:text-primary-foreground'}`} data-testid={`link-nav-${label.toLowerCase().replace(/\s/g, '-')}`}><Icon className="h-4 w-4" /> {label}</Link>)}</nav><div className="mt-9 border-t border-primary-foreground/10 pt-6"><p className="px-3 text-[10px] font-bold uppercase tracking-[.16em] text-primary-foreground/35">Operations view</p><nav className="mt-3 space-y-1">{dashboards.map(({ href, label, icon: Icon }) => <Link key={href} href={href} onClick={() => setMobileOpen(false)} className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${location === href ? 'bg-primary-foreground/10 text-secondary' : 'text-primary-foreground/55 hover:bg-primary-foreground/10 hover:text-primary-foreground'}`} data-testid={`link-nav-${label.toLowerCase()}`}><Icon className="h-4 w-4" /> {label}</Link>)}</nav></div><div className="mt-auto space-y-1 border-t border-primary-foreground/10 pt-4"><Link href="/admin" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-primary-foreground/55 hover:bg-primary-foreground/10 hover:text-primary-foreground" data-testid="link-nav-admin"><Settings2 className="h-4 w-4" /> Admin settings</Link><button onClick={() => signOut({ redirectUrl: basePath || '/' })} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-primary-foreground/55 hover:bg-primary-foreground/10 hover:text-primary-foreground" data-testid="button-logout"><LogOut className="h-4 w-4" /> Log out</button></div></aside>{mobileOpen && <button aria-label="Close navigation" className="fixed inset-0 z-30 bg-primary/30 backdrop-blur-sm lg:hidden" onClick={() => setMobileOpen(false)} data-testid="button-overlay-menu" /> }<div className="lg:pl-[270px]"><header className="sticky top-0 z-20 flex h-[76px] items-center justify-between border-b border-border/70 bg-background/90 px-5 backdrop-blur-md lg:px-10"><button className="rounded-lg p-2 text-primary lg:hidden" onClick={() => setMobileOpen(true)} data-testid="button-open-menu"><Menu className="h-5 w-5" /></button><div className="hidden text-sm text-muted-foreground sm:block">{location.startsWith('/dashboard') ? 'Operations centre' : 'Good to see you, '}{!location.startsWith('/dashboard') && <span className="font-bold text-primary">{user?.firstName || 'neighbour'}</span>}</div><div className="ml-auto flex items-center gap-3"><div className="hidden items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-xs font-semibold text-muted-foreground sm:flex"><span className="h-2 w-2 animate-pulse-soft rounded-full bg-emerald-500" /> Systems online</div><div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary font-display text-sm font-bold text-primary" data-testid="text-user-initials">{(user?.firstName?.[0] ?? email[0] ?? 'R').toUpperCase()}</div></div></header><main className="mx-auto max-w-[1440px] px-5 py-8 lg:px-10 lg:py-10">{children}</main></div></div>;
 }
