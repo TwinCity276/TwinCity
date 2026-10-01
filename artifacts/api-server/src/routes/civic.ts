@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { and, asc, desc, eq, sql } from "drizzle-orm";
-import { getAuth } from "@clerk/express";
+import { clerkClient, getAuth } from "@clerk/express";
 import { db, adminAccessTable, incidentsTable, siteSettingsTable } from "@workspace/db";
 import {
   CreateAdminBody,
@@ -42,13 +42,23 @@ function formatIncident(row: typeof incidentsTable.$inferSelect) {
   };
 }
 
-function currentEmail(req: any) {
-  const claims = getAuth(req).sessionClaims as Record<string, unknown> | null | undefined;
-  return (claims?.email as string | undefined) ?? (claims?.email_address as string | undefined);
+async function currentEmail(req: any): Promise<string | null> {
+  const auth = getAuth(req);
+  const claims = auth.sessionClaims as Record<string, unknown> | null | undefined;
+  const claimEmail = (claims?.email as string | undefined) ?? (claims?.email_address as string | undefined);
+  if (claimEmail) return claimEmail;
+  if (!auth.userId) return null;
+
+  try {
+    const user = await clerkClient.users.getUser(auth.userId);
+    return user.primaryEmailAddress?.emailAddress ?? user.emailAddresses[0]?.emailAddress ?? null;
+  } catch {
+    return null;
+  }
 }
 
 async function requireAdmin(req: any, res: any): Promise<string | null> {
-  const email = currentEmail(req);
+  const email = await currentEmail(req);
   if (!email) {
     res.status(401).json({ error: "Please sign in to access administration." });
     return null;
@@ -77,7 +87,7 @@ router.get("/incidents", async (req, res): Promise<void> => {
   if (parsed.data.department) conditions.push(eq(incidentsTable.department, parsed.data.department));
   if (parsed.data.status) conditions.push(eq(incidentsTable.status, parsed.data.status));
   if (parsed.data.mine) {
-    const email = currentEmail(req);
+    const email = await currentEmail(req);
     if (email) conditions.push(eq(incidentsTable.reporter, email));
     else {
       res.json([]);
